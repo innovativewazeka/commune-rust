@@ -1,0 +1,6 @@
+import warnings
+
+import commune as c
+
+if __name__ == "__main__":
+    c.cli()

@@ -1,0 +1,42 @@
+version: "3.2"
+
+services:
+
+  commune:
+    # image: commune:latest
+    container_name: commune
+    build: ./
+    shm_size: '100gb' # for the shared memory size
+
+    # expose ports for the frontend
+  
+    volumes:
+
+      - ./commune:/commune/commune # MOUNT THE CODE BASE
+      - ./data:/commune/data # MOUNT THE DATA FOLDER
+      - ~/.commune:/config/.commune # MOUNT THE LOCAL STORAGE (~ IS /config/ in the container) 
+      - ./scripts:/commune/scripts
+
+
+      # DOCKER MOUNTS TO CONTROL DOCKER FROM WITHIN THE CONTAINER
+      - /var/run/docker.sock:/var/run/docker.sock # MOUNT THE DOCKER SOCKET
+      - /usr/bin/docker:/usr/bin/docker # MOUNT THE DOCKER BINARY
+      
+
+
+    ports:
+      - 50050-50150:50050-50150 # change the port to the port you want to expose (c port_range)
+    
+    
+    # FOR GPU ONLY
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+
+    command: bash -c "cd /commune; chmod +x /commune/scripts/*; /commune/scripts/startup.sh;"
+
+  
