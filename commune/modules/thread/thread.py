@@ -51,7 +51,7 @@ class Thread(c.Module):
         return queue.Queue(maxsize=maxsize)
 
     @classmethod
-    def join_threads(cls, threads:[str, list]):
+    def join_threads(cls, threads: [str, list]):
 
         threads = cls.thread_map
         for t in threads.values():

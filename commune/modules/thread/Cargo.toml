@@ -1,0 +1,11 @@
+[package]
+name = "rust_threading"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "rust_threading"
+crate-type = ["cdylib"]
+
+[dependencies.pyo3]
+pyo3 = { version = "0.20.3", features = ["extension-module"] }
