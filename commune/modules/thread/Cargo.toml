@@ -1,10 +1,10 @@
 [package]
-name = "rust_threading"
+name = "rust_thread_executor"
 version = "0.1.0"
 edition = "2021"
 
 [lib]
-name = "rust_threading"
+name = "rust_thread_executor"
 crate-type = ["cdylib"]
 
 [dependencies.pyo3]

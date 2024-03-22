@@ -1056,6 +1056,7 @@ class c:
         from importlib import import_module
         module = '.'.join(key.split('.')[:-1])
         object_name = key.split('.')[-1]
+        print(key)
         if verbose:
             c.print(f'Importing {object_name} from {module}')
         obj =  getattr(import_module(module), object_name)
@@ -1710,6 +1711,7 @@ class c:
         if cache:
             if path in c.module_cache:
                 return c.module_cache[path]
+        
         t1 = c.time()
         # convert the simple to path
         path = c.simple2path(path)
@@ -1725,7 +1727,6 @@ class c:
             path = c.path2objectpath(path, search=None)
         
         # import the object
-        
         module = c.import_object(path)
         t2 = c.time()
         c.print(f'Imported {path} in {t2-t1} seconds', color='green', verbose=verbose)
@@ -8317,7 +8318,6 @@ class c:
                     tag = ''
                 name = name + tag_seperator + tag + str(cnt)
         t = threading.Thread(target=fn, args=args, kwargs=kwargs, **extra_kwargs)
-
 
         # set the time it starts
         t.__dict__['start_time'] = c.time()

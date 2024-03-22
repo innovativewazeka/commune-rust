@@ -3,7 +3,7 @@ requires = ["maturin>=1,<2"]
 build-backend = "maturin"
 
 [project]
-name = "rust_threading"
+name = "rust_thread_executor"
 requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",

@@ -13,8 +13,6 @@ class CLI(c.Module):
             fn=  None,
             new_event_loop: bool = True,
             save: bool = True
-
-
         ) :
         self.module = c.Module()
         input = self.argv()
@@ -36,8 +34,9 @@ class CLI(c.Module):
             if '/' in args[0]:
                 args = args[0].split('/') + args[1:]
                 is_fn = False
-
+            
             is_module = bool(not is_fn)
+
             if is_fn:
                 # is a function
                 module = c.Module

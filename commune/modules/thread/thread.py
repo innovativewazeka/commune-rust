@@ -26,6 +26,7 @@ class Thread(c.Module):
         
         import threading
         t = threading.Thread(target=fn, args=args, kwargs=kwargs)
+        
         t.__dict__['time'] = c.time()
         t.daemon = daemon
         if start:
@@ -70,12 +71,16 @@ class Thread(c.Module):
     def test(cls):
         self = cls()
         def fn():
-            print('fn')
-            c.sleep(1)
-            print('fn done')
-        self.thread(fn=fn, tag='test')
-        c.sleep(2)
-        print('done')
+            print("start test")
+            start_time = c.time()
+            sum_value = 0
+            for i in range(1000000001):
+                sum_value += i
+            print("end test")
+            elapsed_time = c.time(start_time)
+            print("elapsed time is", sum_value, elapsed_time)
+
+        self.thread(fn=fn, tag='test', daemon=False)
 
     def semaphore(self, n:int = 10):
         import threading

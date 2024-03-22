@@ -194,7 +194,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "rust_threading"
+name = "rust_thread_executor"
 version = "0.1.0"
 dependencies = [
  "pyo3",
