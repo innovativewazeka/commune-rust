@@ -1,33 +1,24 @@
 use pyo3::prelude::*;
 use std::thread;
-use std::time::Instant;
 
-fn sum_fn(start: usize, end: usize) -> usize {
-    let mut sum: usize = 0;
-    for i in start..=end {
-        sum += i;
-    }
-    sum
+fn create_thread(py: Python, fn_name: &str, args: Vec<&PyAny>, kwargs: &PyDict) -> PyResult<PyObject> {
+    let threading = py.import("threading")?;
+    let fn_obj = py.get(fn_name)?;
+
+    let args_tuple = PyTuple::new(py, args.as_slice());
+    let thread = threading.call1("Thread", (fn_obj, args_tuple, kwargs))?;
+
+    Ok(thread)
 }
 
 fn main() -> PyResult<()> {
-    // Initialize Python interpreter in free-threaded mode
-    pyo3::prepare_freethreaded_python();
+    Python::with_gil(|py| {
+        let fn_name = "python_function";
+        let args = vec![];
+        let kwargs = PyDict::new(py);
+        let thread = create_thread(py, fn_name, args, &kwargs)?;
+        thread.call_method0("start")?;
 
-
-    let start_time = Instant::now();
-
-    // Spawn a new thread to run the Python code
-    let handle = thread::spawn(|| {
-        let sum = sum_fn(1, 50000000);
-    });
-
-    // Wait for the thread to finish execution
-    handle.join().unwrap();
-
-    let elapsed_time = start_time.elapsed();
-    // Print the elapsed time
-    println!("Thread execution time: {:?}", elapsed_time);
-
-    Ok(())
+        Ok(())
+    })
 }
