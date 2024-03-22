@@ -74,11 +74,11 @@ class Thread(c.Module):
             print("start test")
             start_time = c.time()
             sum_value = 0
-            for i in range(1000000001):
+            for i in range(100000001):
                 sum_value += i
             print("end test")
             elapsed_time = c.time(start_time)
-            print("elapsed time is", sum_value, elapsed_time)
+            print("Thread execution time is ", round(elapsed_time, 6), "s", sep='')
 
         self.thread(fn=fn, tag='test', daemon=False)
 

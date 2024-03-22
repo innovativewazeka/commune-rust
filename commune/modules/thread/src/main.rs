@@ -1,40 +1,43 @@
 use pyo3::prelude::*;
-use pyo3::types::PyTuple;
+use std::thread;
+use std::time::Instant;
 
 fn main() -> PyResult<()> {
-
+    // Initialize Python interpreter in free-threaded mode
     pyo3::prepare_freethreaded_python();
 
-    let arg1 = "arg1";
-    let arg2 = "arg2";
-    let arg3 = "arg3";
 
-    Python::with_gil(|py| {
-        let fun: Py<PyAny> = PyModule::from_code(
-            py,
-            "def example(*args, **kwargs):
-                if args != ():
-                    print('called with args', args)
-                if kwargs != {}:
-                    print('called with kwargs', kwargs)
-                if args == () and kwargs == {}:
-                    print('called with no arguments')",
-            "",
-            "",
-        )?
-        .getattr("example")?
-        .into();
+    let start_time = Instant::now();
 
-        // call object without any arguments
-        fun.call0(py)?;
+    // Spawn a new thread to run the Python code
+    let handle = thread::spawn(|| {
+        Python::with_gil(|py| {
+            let fun: Py<PyAny> = PyModule::from_code(
+                py,
+                "def fn():
+                    print('start test')
+                    sum_value = 0
+                    for i in range(100000001):
+                        sum_value += i
+                    print('end test')",
+                "",
+                "",
+            )
+            .unwrap()
+            .getattr("fn")
+            .unwrap()
+            .into();
 
-        // call object with PyTuple
-        let args = PyTuple::new(py, &[arg1, arg2, arg3]);
-        fun.call1(py, args)?;
+            fun.call0(py).unwrap();
+        });
+    });
 
-        // pass arguments as rust tuple
-        let args = (arg1, arg2, arg3);
-        fun.call1(py, args)?;
-        Ok(())
-    })
+    // Wait for the thread to finish execution
+    handle.join().unwrap();
+
+    let elapsed_time = start_time.elapsed();
+    // Print the elapsed time
+    println!("Thread execution time: {:?}", elapsed_time);
+
+    Ok(())
 }
