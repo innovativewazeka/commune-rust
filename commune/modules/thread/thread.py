@@ -74,7 +74,7 @@ class Thread(c.Module):
             print("start test")
             start_time = c.time()
             sum_value = 0
-            for i in range(100000001):
+            for i in range(50000001):
                 sum_value += i
             print("end test")
             elapsed_time = c.time(start_time)

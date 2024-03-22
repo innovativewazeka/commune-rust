@@ -2,6 +2,14 @@ use pyo3::prelude::*;
 use std::thread;
 use std::time::Instant;
 
+fn sum_fn(start: usize, end: usize) -> usize {
+    let mut sum: usize = 0;
+    for i in start..=end {
+        sum += i;
+    }
+    sum
+}
+
 fn main() -> PyResult<()> {
     // Initialize Python interpreter in free-threaded mode
     pyo3::prepare_freethreaded_python();
@@ -11,25 +19,7 @@ fn main() -> PyResult<()> {
 
     // Spawn a new thread to run the Python code
     let handle = thread::spawn(|| {
-        Python::with_gil(|py| {
-            let fun: Py<PyAny> = PyModule::from_code(
-                py,
-                "def fn():
-                    print('start test')
-                    sum_value = 0
-                    for i in range(100000001):
-                        sum_value += i
-                    print('end test')",
-                "",
-                "",
-            )
-            .unwrap()
-            .getattr("fn")
-            .unwrap()
-            .into();
-
-            fun.call0(py).unwrap();
-        });
+        let sum = sum_fn(1, 50000000);
     });
 
     // Wait for the thread to finish execution
