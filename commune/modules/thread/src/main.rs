@@ -1,4 +1,5 @@
 use pyo3::prelude::*;
+use pyo3::types::{PyDict, PyTuple};
 use std::thread;
 
 fn create_thread(py: Python, fn_name: &str, args: Vec<&PyAny>, kwargs: &PyDict) -> PyResult<PyObject> {
@@ -8,7 +9,7 @@ fn create_thread(py: Python, fn_name: &str, args: Vec<&PyAny>, kwargs: &PyDict) 
     let args_tuple = PyTuple::new(py, args.as_slice());
     let thread = threading.call1("Thread", (fn_obj, args_tuple, kwargs))?;
 
-    Ok(thread)
+    Ok(thread.into())
 }
 
 fn main() -> PyResult<()> {
