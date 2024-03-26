@@ -5,5 +5,9 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
+[lib]
+name = "rust_thread_executor"
+crate-type = ["cdylib"]
+
 [dependencies]
-pyo3 = "0.20.0"
+pyo3 = { version = "0.20.3", features = ["extension-module"] }
