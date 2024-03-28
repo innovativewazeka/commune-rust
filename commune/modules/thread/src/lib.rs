@@ -20,7 +20,7 @@ fn execute_python_function(python_function: PyObject, args: Vec<PyObject>) -> Py
 fn create_thread(_py: Python, python_function: PyObject, args: Vec<PyObject>) -> PyResult<()> {
     println!("Start Thread Execution");
 
-    let handle = thread::spawn(|| {
+    let _handle = thread::spawn(|| {
         execute_python_function(python_function, args).expect("Error calling Python function");
     });
 
