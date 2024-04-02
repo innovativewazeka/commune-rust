@@ -1,36 +1,14 @@
-
 import os
 import sys
 import time
 import queue
-import random
 import weakref
 import itertools
 import threading
 
-from loguru import logger
 from typing import Callable
-import concurrent
 from concurrent.futures._base import Future
 import commune as c
-import gc
-
-
-
-# Workers are created as daemon threads. This is done to allow the interpreter
-# to exit when there are still idle threads in a ThreadPoolExecutor's thread
-# pool (i.e. shutdown() was not called). However, allowing workers to die with
-# the interpreter has two undesirable properties:
-#   - The workers would still be running during interpreter shutdown,
-#     meaning that they would fail in unpredictable ways.
-#   - The workers could be killed while evaluating a work item, which could
-#     be bad if the callable being evaluated has external side-effects e.g.
-#     writing to a file.
-#
-# To work around this problem, an exit handler is installed which tells the
-# workers to exit when their work queues are empty and then waits until the
-# threads finish.
-
 
 class Task:
     def __init__(self, fn:str, args:list, kwargs:dict, timeout:int=10, priority:int=1, path=None, **extra_kwargs):
@@ -75,7 +53,6 @@ class Task:
         }
 
     
-
     def run(self):
         """Run the given work item"""
         # Checks if future is canceled or if work item is stale
@@ -137,7 +114,6 @@ class Task:
         else:
             raise TypeError(f"Cannot compare Task with {type(other)}")
     
-
 
 
 NULL_ENTRY = (sys.maxsize, Task(None, (), {}))
