@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor
 import rust_thread_executor
 
 def sum_fn(start, end):
@@ -6,5 +7,10 @@ def sum_fn(start, end):
         sum_value += i
     print(sum_value)
 
-A = rust_thread_executor.create_thread(sum_fn, (1, 101))
-print("here => ", A)
+executor = ThreadPoolExecutor(max_workers=2)
+future_1 = executor.submit(
+    rust_thread_executor.execute_python_function_allow_threads(sum_fn, (1, 10000001))
+)
+future_2 = executor.submit(
+    rust_thread_executor.execute_python_function_allow_threads(sum_fn, (1, 10000001))
+)

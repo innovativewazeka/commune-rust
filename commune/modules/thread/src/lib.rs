@@ -4,6 +4,7 @@ use pyo3::types::PyTuple;
 
 #[pyfunction]
 fn execute_python_function(python_function: PyObject, args: Vec<PyObject>) -> PyResult<()> {
+    println!("Python function execution started");
     Python::with_gil(|py| {
         let args_tuple = PyTuple::new(py, args);
 
@@ -28,8 +29,14 @@ fn create_thread(_py: Python, python_function: PyObject, args: Vec<PyObject>) ->
     Ok(())
 }
 
+#[pyfunction]
+fn execute_python_function_allow_threads(py: Python<'_>, python_function: PyObject, args: Vec<PyObject>) -> PyResult<()> {
+    py.allow_threads(|| execute_python_function(python_function, args))
+}
+
 #[pymodule]
 fn rust_thread_executor(_py: Python, m: &PyModule) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(create_thread, m)?)?;
+    m.add_function(wrap_pyfunction!(execute_python_function_allow_threads, m)?)?;
     Ok(())
 }
