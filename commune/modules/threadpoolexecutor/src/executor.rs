@@ -444,4 +444,14 @@ mod tests {
         assert_eq!(*counter1.read().unwrap(), 6);
         assert_eq!(*counter2.read().unwrap(), 11);
     }
+
+    #[test]
+    fn calculate_delay_test() {
+        fn s(n: u64) -> Duration { Duration::from_secs(n) };
+        assert_eq!(calculate_delay(s(10), s(3), s(0)), (s(7), s(0)));
+        assert_eq!(calculate_delay(s(10), s(11), s(0)), (s(0), s(1)));
+        assert_eq!(calculate_delay(s(10), s(3), s(3)), (s(4), s(0)));
+        assert_eq!(calculate_delay(s(10), s(3), s(9)), (s(0), s(2)));
+        assert_eq!(calculate_delay(s(10), s(12), s(15)), (s(0), s(17)));
+    }
 }
