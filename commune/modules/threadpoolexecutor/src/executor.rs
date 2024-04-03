@@ -251,3 +251,37 @@ impl ThreadPoolExecutor {
         &self.pool
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::sync::{Arc, RwLock};
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    use super::{CoreExecutor, ThreadPoolExecutor, calculate_delay};
+
+    #[test]
+    fn fixed_interval_test() {
+        let timings = Arc::new(RwLock::new(Vec::new()));
+        {
+            let executor = CoreExecutor::new().unwrap();
+            let timings_clone = Arc::clone(&timings);
+            executor.schedule_fixed_rate(
+                Duration::from_secs(0),
+                Duration::from_secs(1),
+                move |_handle| {
+                    timings_clone.write().unwrap().push(Instant::now());
+                }
+            );
+            thread::sleep(Duration::from_millis(5500));
+        }
+
+        let timings = timings.read().unwrap();
+        assert_eq!(timings.len(), 6);
+        for i in 1..6 {
+            let execution_interval = timings[i] - timings[i-1];
+            assert!(execution_interval < Duration::from_millis(1020));
+            assert!(execution_interval > Duration::from_millis(980));
+        }
+    }
+}
