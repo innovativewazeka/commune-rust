@@ -380,4 +380,36 @@ mod tests {
         }
         assert_eq!(*counter.read().unwrap(), 6);
     }
+
+    #[test]
+    fn fixed_rate_stop_test() {
+        let counter1 = Arc::new(RwLock::new(0));
+        let counter2 = Arc::new(RwLock::new(0));
+        let counter1_clone = Arc::clone(&counter1);
+        let counter2_clone = Arc::clone(&counter2);
+        {
+            let executor = CoreExecutor::new().unwrap();
+            let t1 = executor.schedule_fixed_rate(
+                Duration::from_secs(0),
+                Duration::from_secs(1),
+                move |_handle| {
+                    let mut counter = counter1_clone.write().unwrap();
+                    (*counter) += 1;
+                }
+            );
+            executor.schedule_fixed_rate(
+                Duration::from_secs(0),
+                Duration::from_secs(1),
+                move |_handle| {
+                    let mut counter = counter2_clone.write().unwrap();
+                    (*counter) += 1;
+                }
+            );
+            thread::sleep(Duration::from_millis(5500));
+            t1.stop();
+            thread::sleep(Duration::from_millis(5000));
+        }
+        assert_eq!(*counter1.read().unwrap(), 6);
+        assert_eq!(*counter2.read().unwrap(), 11);
+    }    
 }
