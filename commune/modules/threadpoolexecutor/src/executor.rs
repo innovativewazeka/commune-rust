@@ -20,7 +20,7 @@ impl TaskHandle {
         TaskHandle { should_stop: Arc::new(AtomicBool::new(false)) }
     }
 
-    /// Stops the correspondent task. Not that a running task won't be interrupted, but
+    /// Stops the correspondent task. Note that a running task won't be interrupted, but
     /// future tasks executions will be prevented.
     pub fn stop(&self) {
         self.should_stop.store(true, Ordering::Relaxed);
@@ -283,5 +283,31 @@ mod tests {
             assert!(execution_interval < Duration::from_millis(1020));
             assert!(execution_interval > Duration::from_millis(980));
         }
+    }
+
+    #[test]
+    fn fixed_interval_slow_task_test() {
+        let counter = Arc::new(RwLock::new(0));
+        let counter_clone = Arc::clone(&counter);
+        {
+            let executor = CoreExecutor::new().unwrap();
+            executor.schedule_fixed_interval(
+                Duration::from_secs(0),
+                Duration::from_secs(1),
+                move |_handle| {
+                    // TODO: use atomic int when available
+                    let counter = {
+                        let mut counter = counter_clone.write().unwrap();
+                        (*counter) += 1;
+                        *counter
+                    };
+                    if counter == 1 {
+                        thread::sleep(Duration::from_secs(3));
+                    }
+                }
+            );
+            thread::sleep(Duration::from_millis(5500));
+        }
+        assert_eq!(*counter.read().unwrap(), 4);
     }
 }
