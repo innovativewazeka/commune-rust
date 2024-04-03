@@ -4,6 +4,14 @@ use threadpoolexecutor::ThreadPoolExecutor;
 use std::time::{Duration, Instant};
 use std::thread;
 
+fn sum_up_to_100000000() -> u64 {
+    let mut sum = 0;
+    for i in 1..=100000000 {
+        sum += i;
+    }
+    sum
+}
+
 fn main() {    
 
     let executor = ThreadPoolExecutor::new(4).expect("Thread pool creation failed");
@@ -17,11 +25,13 @@ fn main() {
             println!("  time elapsed from start: {:?} seconds", start_time.elapsed().as_secs());
             println!("  thread: {}", thread::current().name().unwrap());
             // Emulate an expensive task
-            thread::sleep(Duration::from_secs(10));
+            // thread::sleep(Duration::from_secs(10));
+            let result = sum_up_to_100000000();
+            println!("{result}");
         },
     );
 
     println!("Task has been scheduled");
-    thread::sleep(Duration::from_secs(20));
+    thread::sleep(Duration::from_secs(5));
     println!("Terminating");
 }
