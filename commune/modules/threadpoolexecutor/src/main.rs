@@ -4,9 +4,9 @@ use threadpoolexecutor::ThreadPoolExecutor;
 use std::time::{Duration, Instant};
 use std::thread;
 
-fn sum_up_to_100000000() -> u64 {
+fn sum_up_to_n(n: u64) -> u64 {
     let mut sum = 0;
-    for i in 1..=100000000 {
+    for i in 1..=n {
         sum += i;
     }
     sum
@@ -26,7 +26,7 @@ fn main() {
             println!("  thread: {}", thread::current().name().unwrap());
             // Emulate an expensive task
             // thread::sleep(Duration::from_secs(10));
-            let result = sum_up_to_100000000();
+            let result = sum_up_to_n(100000000);
             println!("{result}");
         },
     );
