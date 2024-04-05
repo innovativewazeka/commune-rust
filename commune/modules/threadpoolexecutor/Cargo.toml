@@ -1,4 +1,3 @@
-workspace = { members = ["processpoolexecutor"] }
 [package]
 name = "threadpoolexecutor"
 version = "0.1.0"
