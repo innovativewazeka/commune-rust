@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [lib]
-name = "rust_thread_executor"
+name = "executor"
 crate-type = ["cdylib"]
 
 [dependencies]
