@@ -69,3 +69,22 @@ fn calculate_delay(interval: Duration, execution: Duration, delay: Duration) -> 
         }
     }
 }
+
+fn fixed_rate_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, delay: Duration, task_handle: TaskHandle)
+    where F: Fn(&Handle) + Send + 'static
+{
+    if task_handle.stopped() {
+        return;
+    }
+    let start_time = Instant::now();
+    scheduled_fn(handle);
+    let execution = start_time.elapsed();
+    let (next_iter_wait, updated_delay) = calculate_delay(interval, execution, delay);
+    let handle_clone = handle.clone();
+    let t = Timeout::new(next_iter_wait, handle).unwrap()
+        .then(move |_| {
+            fixed_rate_loop(scheduled_fn, interval, &handle_clone, updated_delay, task_handle);
+            Ok::<(), ()>(())
+        });
+    handle.spawn(t);
+}
