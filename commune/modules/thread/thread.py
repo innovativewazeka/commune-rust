@@ -1,5 +1,6 @@
 import commune as c
 from typing import Union
+import rust_thread_executor
 
 class Thread(c.Module):
     
@@ -71,14 +72,14 @@ class Thread(c.Module):
     def test(cls):
         self = cls()
         def fn():
-            print("start test")
+            # print("start test")
             start_time = c.time()
             sum_value = 0
-            for i in range(100000001):
+            for i in range(101):
                 sum_value += i
-            print("end test")
+            # print("end test")
             elapsed_time = c.time(start_time)
-            print("Thread execution time is ", round(elapsed_time, 6), "s", sep='')
+            # print("Thread execution time is ", round(elapsed_time, 6), "s", sep='')
 
         self.thread(fn=fn, tag='test', daemon=False)
 

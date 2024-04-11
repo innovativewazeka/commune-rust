@@ -89,7 +89,6 @@ fn fixed_rate_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, dela
     handle.spawn(t);
 }
 
-
 struct CoreExecutorInner {
     remote: Remote,
     termination_sender: Option<Sender<()>>,
@@ -128,12 +127,12 @@ impl CoreExecutor {
         let thread_handle = thread::Builder::new()
             .name(thread_name.to_owned())
             .spawn(move || {
-                debug!("Core starting");
+                println!("Core starting");
                 let mut core = Core::new().expect("Failed to start core");
                 let _ = core_tx.send(core.remote());
                 match core.run(termination_rx) {
-                    Ok(v) => debug!("Core terminated correctly {:?}", v),
-                    Err(e) => debug!("Core terminated with error: {:?}", e),
+                    Ok(v) => println!("Core terminated correctly {:?}", v),
+                    Err(e) => println!("Core terminated with error: {:?}", e),
                 }
             })?;
         let inner = CoreExecutorInner {
@@ -144,7 +143,7 @@ impl CoreExecutor {
         let executor = CoreExecutor {
             inner: Arc::new(inner)
         };
-        debug!("Executor created");
+        println!("Executor created");
         Ok(executor)
     }
 
@@ -190,7 +189,6 @@ impl CoreExecutor {
         task_handle
     }
 }
-
 
 // ThreadPoolExecutor
 #[derive(Clone)]
@@ -283,6 +281,16 @@ mod tests {
             assert!(execution_interval < Duration::from_millis(1020));
             assert!(execution_interval > Duration::from_millis(980));
         }
+    }
+
+    #[test]
+    fn calculate_delay_test() {
+        fn s(n: u64) -> Duration { Duration::from_secs(n) }
+        assert_eq!(calculate_delay(s(10), s(3), s(0)), (s(7), s(0)));
+        assert_eq!(calculate_delay(s(10), s(11), s(0)), (s(0), s(1)));
+        assert_eq!(calculate_delay(s(10), s(3), s(3)), (s(4), s(0)));
+        assert_eq!(calculate_delay(s(10), s(3), s(9)), (s(0), s(2)));
+        assert_eq!(calculate_delay(s(10), s(12), s(15)), (s(0), s(17)));
     }
 
     #[test]
@@ -443,15 +451,5 @@ mod tests {
         }
         assert_eq!(*counter1.read().unwrap(), 6);
         assert_eq!(*counter2.read().unwrap(), 11);
-    }
-
-    #[test]
-    fn calculate_delay_test() {
-        fn s(n: u64) -> Duration { Duration::from_secs(n) }
-        assert_eq!(calculate_delay(s(10), s(3), s(0)), (s(7), s(0)));
-        assert_eq!(calculate_delay(s(10), s(11), s(0)), (s(0), s(1)));
-        assert_eq!(calculate_delay(s(10), s(3), s(3)), (s(4), s(0)));
-        assert_eq!(calculate_delay(s(10), s(3), s(9)), (s(0), s(2)));
-        assert_eq!(calculate_delay(s(10), s(12), s(15)), (s(0), s(17)));
     }
 }
