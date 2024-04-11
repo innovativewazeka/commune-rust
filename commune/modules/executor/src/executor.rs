@@ -189,3 +189,63 @@ impl CoreExecutor {
         task_handle
     }
 }
+
+// ThreadPoolExecutor
+#[derive(Clone)]
+pub struct ThreadPoolExecutor {
+    executor: CoreExecutor,
+    pool: CpuPool
+}
+
+impl ThreadPoolExecutor {
+    /// Creates a new `ThreadPoolExecutor` with the specified number of threads. Threads will
+    /// be named "pool_thread_0", "pool_thread_1" and so on.
+    pub fn new(threads: usize) -> Result<ThreadPoolExecutor, io::Error> {
+        ThreadPoolExecutor::with_prefix(threads, "pool_thread_")
+    }
+
+    /// Creates a new `ThreadPoolExecutor` with the specified number of threads and prefix for
+    /// the thread names.
+    pub fn with_prefix(threads: usize, prefix: &str) -> Result<ThreadPoolExecutor, io::Error> {
+        let new_executor = CoreExecutor::with_name(&format!("{}executor", prefix))?;
+        Ok(ThreadPoolExecutor::with_executor(threads, prefix, new_executor))
+    }
+
+    /// Creates a new `ThreadPoolExecutor` with the specified number of threads, prefix and
+    /// using the given `CoreExecutor` for scheduling.
+    pub fn with_executor(threads: usize, prefix: &str, executor: CoreExecutor) -> ThreadPoolExecutor {
+        let pool = Builder::new()
+            .pool_size(threads)
+            .name_prefix(prefix)
+            .create();
+        ThreadPoolExecutor { pool, executor }
+    }
+
+    /// Schedules the given function to be executed every `interval`. The function will be
+    /// scheduled on one of the threads in the thread pool.
+    pub fn schedule_fixed_rate<F>(&self, initial: Duration, interval: Duration, scheduled_fn: F) -> TaskHandle
+        where F: Fn(&Remote) + Send + Sync + 'static
+    {
+        let pool_clone = self.pool.clone();
+        let arc_fn = Arc::new(scheduled_fn);
+        self.executor.schedule_fixed_interval(  // Fixed interval is enough
+            initial,
+            interval,
+            move |handle| {
+                let arc_fn_clone = arc_fn.clone();
+                let remote = handle.remote().clone();
+                let t = pool_clone.spawn_fn(move || {
+                    arc_fn_clone(&remote);
+                    Ok::<(),()>(())
+                });
+                handle.spawn(t);
+            }
+        )
+    }
+
+    // TODO: make pub(crate)
+    /// Returns the thread pool used internally.
+    pub fn pool(&self) -> &CpuPool {
+        &self.pool
+    }
+}
