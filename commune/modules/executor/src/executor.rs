@@ -308,4 +308,23 @@ mod tests {
         }
         assert_eq!(*counter.read().unwrap(), 4);
     }
+
+    #[test]
+    fn fixed_rate_test() {
+        let counter = Arc::new(RwLock::new(0));
+        let counter_clone = Arc::clone(&counter);
+        {
+            let executor = CoreExecutor::new().unwrap();
+            executor.schedule_fixed_rate(
+                Duration::from_secs(0),
+                Duration::from_secs(1),
+                move |_handle| {
+                    let mut counter = counter_clone.write().unwrap();
+                    (*counter) += 1;
+                }
+            );
+            thread::sleep(Duration::from_millis(5500));
+        }
+        assert_eq!(*counter.read().unwrap(), 6);
+    }
 }
