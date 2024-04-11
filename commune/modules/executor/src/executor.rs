@@ -54,3 +54,18 @@ fn fixed_interval_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, 
         });
     handle.spawn(t);
 }
+
+fn calculate_delay(interval: Duration, execution: Duration, delay: Duration) -> (Duration, Duration) {
+    if execution >= interval {
+        (Duration::from_secs(0), delay + execution - interval)
+    } else {
+        let wait_gap = interval - execution;
+        if delay == Duration::from_secs(0) {
+            (wait_gap, Duration::from_secs(0))
+        } else if delay < wait_gap {
+            (wait_gap - delay, Duration::from_secs(0))
+        } else {
+            (Duration::from_secs(0), delay - wait_gap)
+        }
+    }
+}
