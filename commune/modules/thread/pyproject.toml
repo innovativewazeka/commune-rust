@@ -3,8 +3,8 @@ requires = ["maturin>=1,<2"]
 build-backend = "maturin"
 
 [project]
-name = "pyo3_example"
-requires-python = ">=3.7"
+name = "rust_thread_executor"
+requires-python = ">=3.8"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
