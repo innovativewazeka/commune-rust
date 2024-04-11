@@ -88,3 +88,104 @@ fn fixed_rate_loop<F>(scheduled_fn: F, interval: Duration, handle: &Handle, dela
         });
     handle.spawn(t);
 }
+
+struct CoreExecutorInner {
+    remote: Remote,
+    termination_sender: Option<Sender<()>>,
+    thread_handle: Option<JoinHandle<()>>,
+}
+
+impl Drop for CoreExecutorInner {
+    fn drop(&mut self) {
+        let _ = self.termination_sender.take().unwrap().send(());
+        let _ = self.thread_handle.take().unwrap().join();
+    }
+}
+
+
+//  CoreExecutor
+pub struct CoreExecutor {
+    inner: Arc<CoreExecutorInner>
+}
+
+impl Clone for CoreExecutor {
+    fn clone(&self) -> Self {
+        CoreExecutor { inner: Arc::clone(&self.inner) }
+    }
+}
+
+impl CoreExecutor {
+    // Creates a new `CoreExecutor`.
+    pub fn new() -> Result<CoreExecutor, io::Error> {
+        CoreExecutor::with_name("core_executor")
+    }
+
+    // Creates a new `CoreExecutor` with the specified thread name.
+    pub fn with_name(thread_name: &str) -> Result<CoreExecutor, io::Error> {
+        let (termination_tx, termination_rx) = channel();
+        let (core_tx, core_rx) = channel();
+        let thread_handle = thread::Builder::new()
+            .name(thread_name.to_owned())
+            .spawn(move || {
+                debug!("Core starting");
+                let mut core = Core::new().expect("Failed to start core");
+                let _ = core_tx.send(core.remote());
+                match core.run(termination_rx) {
+                    Ok(v) => debug!("Core terminated correctly {:?}", v),
+                    Err(e) => debug!("Core terminated with error: {:?}", e),
+                }
+            })?;
+        let inner = CoreExecutorInner {
+            remote: core_rx.wait().expect("Failed to receive remote"),
+            termination_sender: Some(termination_tx),
+            thread_handle: Some(thread_handle),
+        };
+        let executor = CoreExecutor {
+            inner: Arc::new(inner)
+        };
+        debug!("Executor created");
+        Ok(executor)
+    }
+
+    // Schedule a function for running at fixed intervals. The executor will try to run the
+    // function every `interval`, but if one execution takes longer than `interval` it will delay
+    // all the subsequent calls.
+    pub fn schedule_fixed_interval<F>(&self, initial: Duration, interval: Duration, scheduled_fn: F) -> TaskHandle
+        where F: Fn(&Handle) + Send + 'static
+    {
+        let task_handle = TaskHandle::new();
+        let task_handle_clone = task_handle.clone();
+        self.inner.remote.spawn(move |handle| {
+            let handle_clone = handle.clone();
+            let t = Timeout::new(initial, handle).unwrap()
+                .then(move |_| {
+                    fixed_interval_loop(scheduled_fn, interval, &handle_clone, task_handle_clone);
+                    Ok::<(), ()>(())
+                });
+            handle.spawn(t);
+            Ok::<(), ()>(())
+        });
+        task_handle
+    }
+
+    // Schedule a function for running at fixed rate. The executor will try to run the function
+    // every `interval`, and if a task execution takes longer than `interval`, the wait time
+    // between task will be reduced to decrease the overall delay.
+    pub fn schedule_fixed_rate<F>(&self, initial: Duration, interval: Duration, scheduled_fn: F) -> TaskHandle
+        where F: Fn(&Handle) + Send + 'static
+    {
+        let task_handle = TaskHandle::new();
+        let task_handle_clone = task_handle.clone();
+        self.inner.remote.spawn(move |handle| {
+            let handle_clone = handle.clone();
+            let t = Timeout::new(initial, handle).unwrap()
+                .then(move |_| {
+                    fixed_rate_loop(scheduled_fn, interval, &handle_clone, Duration::from_secs(0), task_handle_clone);
+                    Ok::<(), ()>(())
+                });
+            handle.spawn(t);
+            Ok::<(), ()>(())
+        });
+        task_handle
+    }
+}
