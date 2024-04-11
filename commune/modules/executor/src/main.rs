@@ -1,4 +1,5 @@
-extern crate threadpoolexecutor;
+// extern crate threadpoolexecutor;
+pub mod threadpoolexecutor;
 use threadpoolexecutor::ThreadPoolExecutor;
 
 use std::time::{Duration, Instant};
@@ -7,7 +8,7 @@ use std::thread;
 fn test_function(n: u64) -> u64 {
     let mut sum = 0;
     for i in 1..=n {
-        for j in j..=n {
+        for j in 1..=n {
             sum += i * j;
         }
     }
@@ -28,12 +29,11 @@ fn main() {
             println!("  thread: {}", thread::current().name().unwrap());
             // Emulate an expensive task
             // thread::sleep(Duration::from_secs(10));
-            let result = test_function(1000);
-            println!("{result}");
+            test_function(10000);
         },
     );
 
     println!("Task has been scheduled");
-    thread::sleep(Duration::from_secs(10));
+    thread::sleep(Duration::from_secs(5));
     println!("Terminating");
 }

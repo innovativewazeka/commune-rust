@@ -127,12 +127,12 @@ impl CoreExecutor {
         let thread_handle = thread::Builder::new()
             .name(thread_name.to_owned())
             .spawn(move || {
-                debug!("Core starting");
+                println!("Core starting");
                 let mut core = Core::new().expect("Failed to start core");
                 let _ = core_tx.send(core.remote());
                 match core.run(termination_rx) {
-                    Ok(v) => debug!("Core terminated correctly {:?}", v),
-                    Err(e) => debug!("Core terminated with error: {:?}", e),
+                    Ok(v) => println!("Core terminated correctly {:?}", v),
+                    Err(e) => println!("Core terminated with error: {:?}", e),
                 }
             })?;
         let inner = CoreExecutorInner {
@@ -143,7 +143,7 @@ impl CoreExecutor {
         let executor = CoreExecutor {
             inner: Arc::new(inner)
         };
-        debug!("Executor created");
+        println!("Executor created");
         Ok(executor)
     }
 
