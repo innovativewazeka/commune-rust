@@ -28,6 +28,7 @@ class CLI(c.Module):
             functions = list(set(self.module.functions()  + self.module.get_attributes()))
             # is it a fucntion, assume it is for the module
             module_list = c.modules()
+            # print("module_list => ", module_list)
             # handle module/function
             is_fn = args[0] in functions
 

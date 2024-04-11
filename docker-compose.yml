@@ -38,5 +38,3 @@ services:
     #           capabilities: [gpu]
 
     command: bash -c "cd /commune; chmod +x /commune/scripts/*; /commune/scripts/startup.sh;"
-
-  

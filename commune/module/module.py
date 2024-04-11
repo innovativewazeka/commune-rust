@@ -1744,9 +1744,6 @@ class c:
         if ('modules/' + path.replace('.', '/')) in filepath:
             return True
         return False
-    
-
-
 
     tree_cache = {}
     @classmethod
