@@ -14,4 +14,5 @@ fn main() {
     let end_time = Instant::now();
     let elapsed_time = end_time - start_time;
     println!("Elapsed time: {} milliseconds", elapsed_time.subsec_millis());
+    print("Elapsed time:", elapsed_time, "seconds")
 }
