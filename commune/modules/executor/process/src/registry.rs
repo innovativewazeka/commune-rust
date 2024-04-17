@@ -70,7 +70,7 @@ impl fmt::Debug for ThreadBuilder {
 /// This trait is pub-in-private -- E0445 forces us to make it public,
 /// but we don't actually want to expose these details in the API.
 pub trait ThreadSpawn {
-    private_decl! {}
+    // private_decl! {}
 
     /// Spawn a thread with the `ThreadBuilder` parameters, and then
     /// call `ThreadBuilder::run()`.
@@ -85,7 +85,7 @@ pub trait ThreadSpawn {
 pub struct DefaultSpawn;
 
 impl ThreadSpawn for DefaultSpawn {
-    private_impl! {}
+    // private_impl! {}
 
     fn spawn(&mut self, thread: ThreadBuilder) -> io::Result<()> {
         let mut b = thread::Builder::new();
@@ -120,7 +120,7 @@ impl<F> ThreadSpawn for CustomSpawn<F>
 where
     F: FnMut(ThreadBuilder) -> io::Result<()>,
 {
-    private_impl! {}
+    // private_impl! {}
 
     #[inline]
     fn spawn(&mut self, thread: ThreadBuilder) -> io::Result<()> {
