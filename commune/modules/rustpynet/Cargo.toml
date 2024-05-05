@@ -1,0 +1,38 @@
+[package]
+name = "rustpynet"
+version = "0.1.0"
+edition = "2021"
+categories = ["development-tools::bindings", "python"]
+description = "RustPyNet is a crate designed to help use python inside multiple threads for small-medium workloads like calling fast execution callbacks and small-medium operations from multiple places in an orchestrated manner. RustPyNet is built on top of PyO3 and supports all PyO3 python operations, including basic responses for returning function results."
+documentation = "https://docs.rs/RustPyNet"
+keywords = ["python", "threading", "pyo3"]
+license = "MIT"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies.chrono]
+version = "0.4"
+
+[dependencies.lazy_static]
+version = "1.4"
+
+[dependencies.md5]
+version = "0.7"
+
+[dependencies.proc-macro2]
+version = "1.0"
+
+[dependencies.pyo3]
+version = "0.15"
+
+[dependencies.quote]
+version = "1.0"
+
+[dependencies.rand]
+version = "0.8.5"
+
+[dependencies.rustpynet_macros]
+version = "0.1.2"
+
+[dependencies.syn]
+version = "1.0"

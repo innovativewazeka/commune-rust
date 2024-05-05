@@ -13,14 +13,20 @@ class AESKey(c.Module):
     def __init__(self, key:str ): 
         self.bs = AES.block_size
         self.key_phrase = hashlib.sha256(key.encode()).digest()
+        print(self.bs, self.key_phrase)
 
     def encrypt(self, data, return_string = True):
         data = self.python2str(data)
         data = self._pad(data)
         iv = Random.new().read(AES.block_size)
         cipher = AES.new(self.key_phrase, AES.MODE_CBC, iv)
+
+        print("1 => ", data.encode(), iv)
+        # print("2 => ", cipher.encrypt(data.encode()))
+        # print("3 => ", iv + cipher.encrypt(data.encode()))
         
         encrypted_bytes = base64.b64encode(iv + cipher.encrypt(data.encode()))
+
         encrypted_data =  encrypted_bytes.decode() if return_string else encrypted_bytes
 
         return encrypted_data

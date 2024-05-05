@@ -145,7 +145,7 @@ class Keypair(c.Module):
                 ss58_address = private_key_obj.public_key.to_checksum_address()
             
             
-       
+        
         
         if not public_key:
             raise ValueError('No SS58 formatted address or public key provided')
@@ -674,6 +674,7 @@ class Keypair(c.Module):
 
         else:
             seed_array = bip39_to_mini_secret(mnemonic, "", language_code)
+            c.print(mnemonic, seed_array, binascii.hexlify(bytearray(seed_array)).decode("ascii"))
 
             keypair = cls.create_from_seed(
                 seed_hex=binascii.hexlify(bytearray(seed_array)).decode("ascii"),
@@ -1289,7 +1290,7 @@ class Keypair(c.Module):
     def test_encryption(cls,value = 10):
         key = cls.gen()
         enc = key.encrypt(value)
-        c.print(enc)
+        # c.print(enc)
         dec = key.decrypt(enc)
         assert dec == value, f'encryption failed, {dec} != {value}'
         return {'encrypted':enc, 'decrypted': dec}
